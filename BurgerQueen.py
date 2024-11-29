@@ -4,8 +4,20 @@
 # En bruker som er ansatt skal kunne se alle ordre
 # En bruker som er ansatt skal kunne se inventaret av ingredienser
 # En bruker som er ansatt skal kunne markere en ordre som fullført, og systemet skal trekke fra brukte ingredienser fra inventaret
-
+from db import checkUser
 
 def main():
     print("console.log('break line')")
+    print("Velkommen til Burger Queens nye bestillingsportal")
     
+    
+    
+def Ordre():
+    print("ordre")
+    
+    
+    
+def Login():
+    print("login")
+    
+checkUser("Geralt")
