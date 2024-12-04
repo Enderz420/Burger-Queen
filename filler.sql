@@ -1,14 +1,14 @@
+DROP TABLE IF EXISTS BurgerHasIngredienser;
 DROP TABLE IF EXISTS Ordre;
 DROP TABLE IF EXISTS Burger;
 DROP TABLE IF EXISTS Ingredienser;
 DROP TABLE IF EXISTS Brukere;
-DROP TABLE IF EXISTS BurgerHasIngredienser;
 
 CREATE TABLE IF NOT EXISTS "Brukere" (
 	"ID"	INTEGER NOT NULL UNIQUE,
 	"Navn"	TEXT NOT NULL UNIQUE,
 	"Passord"	TEXT NOT NULL,
-	"Ansatt"	TEXT NOT NULL DEFAULT 'Nei',
+	"Ansatt"	INTEGER NOT NULL DEFAULT 0,
 	PRIMARY KEY("ID" AUTOINCREMENT)
 );
 
@@ -26,13 +26,12 @@ CREATE TABLE IF NOT EXISTS "Burger"(
 );
 
 CREATE TABLE IF NOT EXISTS "Ordre" (
-	"ID" INTEGER NOT NULL UNIQUE,
-	"Hvem"	TEXT NOT NULL,
-	"Hva"	TEXT NOT NULL,
-	"Produsert"	TEXT NOT NULL DEFAULT 'Nei',
-	PRIMARY KEY("ID" AUTOINCREMENT),
-	CONSTRAINT "BurgerID" FOREIGN KEY("Hva") REFERENCES "Burger"("Navn"),
-	CONSTRAINT "Bruker" FOREIGN KEY("Hvem") REFERENCES "Brukere"("Navn")
+    "ID" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "Hvem" TEXT NOT NULL,
+    "Hva" TEXT NOT NULL,
+    "Produsert" INTEGER NOT NULL DEFAULT 0,
+    CONSTRAINT "BurgerID" FOREIGN KEY("Hva") REFERENCES "Burger"("Navn"),
+    CONSTRAINT "Bruker" FOREIGN KEY("Hvem") REFERENCES "Brukere"("Navn")
 );
 
 CREATE TABLE IF NOT EXISTS "BurgerHasIngredienser" (
@@ -44,10 +43,10 @@ CREATE TABLE IF NOT EXISTS "BurgerHasIngredienser" (
 
 INSERT INTO Brukere (ID, Navn, Passord, Ansatt)
 Values 
-(1, "Geralt", "hesterbest", "Nei"),
-(2, "Yennefer", "qwerty", "Nei"),
-(3, "Roach", "pizza", "Nei"),
-(4, "Jaskier", "nyttpassord", "Ja");
+(1, "Geralt", "hesterbest", 0),
+(2, "Yennefer", "qwerty", 0),
+(3, "Roach", "pizza", 0),
+(4, "Jaskier", "nyttpassord", 1);
 
 INSERT INTO Burger (ID, Navn)
 Values
@@ -66,12 +65,12 @@ Values
 (6, "Agurk", 666),
 (7, "Potet", 420);
 
-INSERT INTO Ordre (ID, Hvem, Hva, Produsert)
+INSERT INTO Ordre (Hvem, Hva, Produsert)
 Values
-(1, "Geralt", "Whopper Queen", "Ja"),
-(2, "Geralt", "Whopper Queen", "Nei"),
-(3, "Jaskier", "Triple Cheese Princess", "Nei"),
-(4, "Roach", "Whopper Queen", "Nei");
+("Geralt", "Whopper Queen", 1),
+("Geralt", "Whopper Queen", 0),
+("Jaskier", "Triple Cheese Princess", 0),
+("Roach", "Whopper Queen", 0);
 
 INSERT INTO BurgerHasIngredienser (BurgerID, IngrediensID)
 VALUES
