@@ -16,11 +16,6 @@ def addOrder(burger, bruker):
     print(cursor.fetchall())
     cursor.execute("SELECT * FROM ordre ORDER BY ID DESC LIMIT 1;")
     new_order = cursor.fetchone()
-    # lagre variabel
-    # if 
-    #   # kjøre  fjern ingred
-
-    con.close()
 
     if new_order:
         ordre_id, hvem, hva, produsert = new_order
@@ -44,7 +39,7 @@ def addOrder(burger, bruker):
     else:
         print("Ingen bestilling funnet")
 
-def removeOrder(ID): # TODO: Add ingredients on order removal if it's done
+def removeOrder(ID): # TODO: Remove ingredients on order removal if it's done
     try:
         con = sqlite3.connect("database.db")
         print("remove order")
@@ -52,19 +47,29 @@ def removeOrder(ID): # TODO: Add ingredients on order removal if it's done
         cursor = con.cursor()
         cursor.execute("SELECT * FROM ordre WHERE ID = ?", (ID,))
         result = cursor.fetchone()[0]
-        cursor.execute("SELECT produsert from ordre where ID = ?", (ID,))
-        produsert = cursor.fetchone()[0]
+        
+        cursor.execute("SELECT Produsert from ordre where ID = ?", (ID,))
+        produsert = cursor.fetchone()
         if produsert == 1:
-            burger = cursor.execute("SELECT burger FROM Ordre where ID = ?", (ID,))
-            deductIngredienser(burger)
+            cursor.execute("SELECT Hva FROM Ordre where ID = ?", (ID,))
+            burgers = cursor.fetchone()
+            deductIngredienser(burgers)
+        else:
+            cursor.execute("SELECT Hva FROM Ordre where ID = ?", (ID,))
+            burgers = cursor.fetchone()
+            addIngredienser(burgers)
+        print(ID)
         print(result) 
         if result == ID: 
-            cursor.execute("DELETE FROM ordre WHERE ID = ?", (ID,))
+            cursor.execute("DELETE FROM Ordre WHERE ID = ?", (ID,))
             con.commit()
-            cursor.execute("SELECT * FROM ordre")
+            cursor.execute("SELECT * FROM Ordre")
         else:
             print("Could not handle")
+            
         con.close()
+        
+        
     except sqlite3.Error as e:
         print(f"{e}")
 
@@ -101,7 +106,7 @@ def addIngredienser(burger):
     con = sqlite3.connect("database.db")
     cursor = con.cursor()
     
-    cursor.execute("SELECT IngrediensID FROM BurgerHasIngredienser WHERE BurgerID = ?", (burger,))
+    cursor.execute("SELECT IngrediensID FROM BurgerHasIngredienser WHERE BurgerID = ?", (burger))
     ingredienser = cursor.fetchall()
 
     for g_ingrediens in ingredienser:
@@ -171,4 +176,5 @@ def checkOrders():
     con.close()
     for row in rows:
         print(f"{row}\n", sep='-')
-        
+
+checkOrders()

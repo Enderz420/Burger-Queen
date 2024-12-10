@@ -4,7 +4,7 @@
 # En bruker som er ansatt skal kunne se alle ordre
 # En bruker som er ansatt skal kunne se inventaret av ingredienser
 # En bruker som er ansatt skal kunne markere en ordre som fullført, og systemet skal trekke fra brukte ingredienser fra inventaret
-from db import loginUser, checkInventory, checkUserAnsettelse, checkUser, checkOrders
+from db import loginUser, checkInventory, checkUserAnsettelse, checkUser, checkOrders, addOrder, removeOrder
 
 isLoggedIn = False # default value
 isAnsatt = False # default value
@@ -39,7 +39,25 @@ def main(): # TODO: Format output to be more prettier
     
 def Ordre(): # TODO: Remove later
     print("ordre")
-    checkOrders()
+    print("Hva vil du gjøre?")
+    if isAnsatt:
+        user_input = str(input("Vennligst oppgi valg: "))
+        match user_input:
+            case "a":
+                checkUser()
+            case "b":
+                listInventory(username)
+            case _:
+                pass
+    else:
+        user_input = str(input("Vennligst oppgi valg: "))
+        match user_input.lower():
+            case "a":
+                addOrder(burger=str(input("Hva vil du bestille?")))
+            case "b":
+                listInventory(username)
+            case _:
+                pass
     
     
     
