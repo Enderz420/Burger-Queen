@@ -16,6 +16,10 @@ def addOrder(burger, bruker):
     print(cursor.fetchall())
     cursor.execute("SELECT * FROM ordre ORDER BY ID DESC LIMIT 1;")
     new_order = cursor.fetchone()
+    # lagre variabel
+    # if 
+    #   # kjøre  fjern ingred
+
     con.close()
 
     if new_order:
@@ -40,7 +44,7 @@ def addOrder(burger, bruker):
     else:
         print("Ingen bestilling funnet")
 
-def removeOrder(ID, produsert): # TODO: Add ingredients on order removal if it's done
+def removeOrder(ID): # TODO: Add ingredients on order removal if it's done
     try:
         con = sqlite3.connect("database.db")
         print("remove order")
@@ -48,7 +52,11 @@ def removeOrder(ID, produsert): # TODO: Add ingredients on order removal if it's
         cursor = con.cursor()
         cursor.execute("SELECT * FROM ordre WHERE ID = ?", (ID,))
         result = cursor.fetchone()[0]
-        
+        cursor.execute("SELECT produsert from ordre where ID = ?", (ID,))
+        produsert = cursor.fetchone()[0]
+        if produsert == 1:
+            burger = cursor.execute("SELECT burger FROM Ordre where ID = ?", (ID,))
+            deductIngredienser(burger)
         print(result) 
         if result == ID: 
             cursor.execute("DELETE FROM ordre WHERE ID = ?", (ID,))
