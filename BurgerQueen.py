@@ -47,13 +47,16 @@ def Ordre(): # TODO: Remove later
                 checkUser()
             case "b":
                 listInventory(username)
+            case "c":
+                checkOrders(username)
+                removeOrder(ID=int(input("Hvilken ordre vil du fjerne")))
             case _:
                 pass
     else:
         user_input = str(input("Vennligst oppgi valg: "))
         match user_input.lower():
             case "a":
-                addOrder(burger=str(input("Hva vil du bestille?")))
+                addOrder(burger=int(input("Hva vil du bestille?")), username=username)
             case "b":
                 listInventory(username)
             case _:

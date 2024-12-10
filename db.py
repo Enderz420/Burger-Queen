@@ -169,12 +169,17 @@ def checkInventory(user):
         print("Bruker er ikke ansatt")
     con.close()
         
-def checkOrders():
+def checkOrders(username):
     con = sqlite3.connect("database.db")
-    cursor.execute('SELECT * FROM Ordre')
+    cursor.execute("SELECT * FROM Brukere WHERE Navn = ? AND Ansatt = 1", (username,))
+    result = cursor.fetchone()
+    if result:
+        cursor.execute("SELECT * FROM Ordre")
+    else:    
+        cursor.execute('SELECT * FROM Ordre WHERE Hvem = ?', (username,))
     rows = cursor.fetchall()
     con.close()
     for row in rows:
         print(f"{row}\n", sep='-')
 
-checkOrders()
+checkOrders("Geralt")
