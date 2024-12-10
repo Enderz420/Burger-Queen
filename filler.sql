@@ -9,28 +9,28 @@ CREATE TABLE IF NOT EXISTS "Brukere" (
 	"Navn"	TEXT NOT NULL UNIQUE,
 	"Passord"	TEXT NOT NULL,
 	"Ansatt"	INTEGER NOT NULL DEFAULT 0,
-	PRIMARY KEY("ID" AUTOINCREMENT)
+	PRIMARY KEY("ID")
 );
 
 CREATE TABLE IF NOT EXISTS "Ingredienser" (
 	"ID"	INTEGER NOT NULL UNIQUE,
 	"Ingrediens"	TEXT NOT NULL,
 	"HvorMye"	TEXT NOT NULL,
-	PRIMARY KEY("ID" AUTOINCREMENT)
+	PRIMARY KEY("ID")
 );
 
 CREATE TABLE IF NOT EXISTS "Burger"(
 	"ID"	INTEGER NOT NULL UNIQUE,
 	"Navn"	TEXT NOT NULL UNIQUE,
-	PRIMARY KEY("ID" AUTOINCREMENT)
+	PRIMARY KEY("ID")
 );
 
 CREATE TABLE IF NOT EXISTS "Ordre" (
-    "ID" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "ID" INTEGER PRIMARY KEY,
     "Hvem" TEXT NOT NULL,
-    "Hva" TEXT NOT NULL,
+    "Hva" INTEGER NOT NULL,
     "Produsert" INTEGER NOT NULL DEFAULT 0,
-    CONSTRAINT "BurgerID" FOREIGN KEY("Hva") REFERENCES "Burger"("Navn"),
+    CONSTRAINT "BurgerID" FOREIGN KEY("Hva") REFERENCES "Burger"("ID"),
     CONSTRAINT "Bruker" FOREIGN KEY("Hvem") REFERENCES "Brukere"("Navn")
 );
 
@@ -67,10 +67,10 @@ Values
 
 INSERT INTO Ordre (Hvem, Hva, Produsert)
 Values
-("Geralt", "Whopper Queen", 1),
-("Geralt", "Whopper Queen", 0),
-("Jaskier", "Triple Cheese Princess", 0),
-("Roach", "Whopper Queen", 0);
+("Geralt", 1, 1), 
+("Geralt", 1, 0),  
+("Jaskier", 2, 0), 
+("Roach", 1, 0);   
 
 INSERT INTO BurgerHasIngredienser (BurgerID, IngrediensID)
 VALUES

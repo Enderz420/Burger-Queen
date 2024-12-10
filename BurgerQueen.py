@@ -4,43 +4,60 @@
 # En bruker som er ansatt skal kunne se alle ordre
 # En bruker som er ansatt skal kunne se inventaret av ingredienser
 # En bruker som er ansatt skal kunne markere en ordre som fullført, og systemet skal trekke fra brukte ingredienser fra inventaret
-from db import loginUser, checkInventory, checkUserAnsettelse, checkUser, checkOrders
+from db import loginUser, checkInventory, checkUserAnsettelse, checkUser, checkOrders, addOrder, removeOrder
 
 isLoggedIn = False # default value
 isAnsatt = False # default value
 username = None # default value
 
-def main():
+def main(): # TODO: Format output to be more prettier
     print("console.log('break line')")
     print("Velkommen til Burger Queens nye bestillingsportal")
     print("Hva vil du gjøre?")
     while True:    
         if not isLoggedIn:
             Login()
+        if isAnsatt:
+            user_input = str(input("Vennligst oppgi valg: "))
+            match user_input:
+                case "a":
+                    checkUser()
+                case "b":
+                    listInventory(username)
+                case _:
+                    break
         else:
-            if isAnsatt:
-                user_input = str(input("Vennligst oppgi valg: "))
-                match user_input:
-                    case "a":
-                        checkUser()
-                    case "b":
-                        listInventory(username)
-                    case _:
-                        break
-            else:
-                user_input = str(input("Vennligst oppgi valg: "))
-                match user_input.lower():
-                    case "a":
-                        Ordre()
-                    case "b":
-                        listInventory(username)
-                    case _:
-                        break
+            user_input = str(input("Vennligst oppgi valg: "))
+            match user_input.lower():
+                case "a":
+                    Ordre()
+                case "b":
+                    listInventory(username)
+                case _:
+                    break
         
     
-def Ordre():
+def Ordre(): # TODO: Remove later
     print("ordre")
-    checkOrders()
+    print("Hva vil du gjøre?")
+    if isAnsatt:
+        user_input = str(input("Vennligst oppgi valg: "))
+        match user_input:
+            case "a":
+                checkUser()
+            case "b":
+                listInventory(username)
+            case _:
+                pass
+    else:
+        user_input = str(input("Vennligst oppgi valg: "))
+        match user_input.lower():
+            case "a":
+                addOrder(burger=str(input("Hva vil du bestille?")))
+            case "b":
+                listInventory(username)
+            case _:
+                pass
     
     
     
@@ -63,7 +80,7 @@ def Login():
         print("Du har ikke en bruker!")
     
     
-def listInventory(username):
+def listInventory(username): # TODO: Remove later
     if isLoggedIn & isAnsatt:    
         print("oascnas")
         checkInventory(username)
