@@ -7,12 +7,23 @@ cursor = con.cursor()
 ## TODO: Clean up code.
 ### TODO: Comments
 
+def init():
+    with open('filler.sql', 'r') as sql_file:
+        sql_script = sql_file.read()
+
+    db = sqlite3.connect('database.db')
+    cursor = db.cursor()
+    cursor.executescript(sql_script)
+    db.commit()
+    db.close()
+
 # ta inn burger, og bruker
 def addOrder(burger, bruker):
     try:
         con = sqlite3.connect("database.db")
         cursor = con.cursor()
         print("add order")
+        checkUser(bruker)
         cursor.execute("INSERT INTO ordre (Hvem, Hva, Produsert) VALUES (?, ?, ?)", (bruker, burger, 0,))
         con.commit()
         cursor.execute("SELECT * FROM ordre")
@@ -25,7 +36,7 @@ def addOrder(burger, bruker):
             if produsert == 1:
                 produsert = "Ja"
             produsert = "Nei"
-            print(f"Nyeste bestilling: Bestillingsnummer: {ordre_id}\n Bestiller: {hvem}\n Burger: {hva}\n Ferdig? {produsert}")
+            print(f"Nyeste bestilling \nBestillingsnummer: {ordre_id}\n Bestiller: {hvem}\n Burger: {hva}\n Ferdig? {produsert}")
             deductIngredienser(burger)
             
             match produsert:
@@ -35,10 +46,6 @@ def addOrder(burger, bruker):
                     produsert = 0
                 case _:
                     pass
-            if produsert == 1:
-                print("Bestilling er ferdig!")
-            else:
-                print("Nyeste bestilling er ikke ferdig enda.")
         else:
             print("Ingen bestilling funnet")
     except sqlite3.Error as e:
@@ -71,7 +78,8 @@ def removeOrder(ID):
             cursor.execute("SELECT * FROM Ordre")
         else:
             print("Could not handle")
-            
+        
+        con.commit()    
         con.close()
     except sqlite3.Error as e:
         print(f"{e}")
@@ -96,6 +104,7 @@ def deductIngredienser(burger):
                 print(f"remove one {ingrediens}")
 
             else:
+                cursor.execute("SELECT Ingrediens FROM Ingredienser WHERE ID = ?", (ingrediens,))
                 print(f"Du har ikke nokk {ingrediens} til å lage dette!")
             
         con.commit()
@@ -135,6 +144,13 @@ def checkUser(user):
     con.close()
     print(result)
 
+def listUsers():
+    con = sqlite3.connect("database.db")
+    cursor = con.cursor()
+    cursor.execute("SELECT Navn FROM Brukere")
+    result = cursor.fetchall()
+    print(result)
+    
 def checkUserAnsettelse(user):
     con = sqlite3.connect("database.db")
     cursor.execute("SELECT navn FROM Brukere WHERE Navn = ? AND Ansatt = 1", (user,))
@@ -162,7 +178,9 @@ def createUser(username, password):
         con = sqlite3.connect("database.db")
         cursor = con.cursor()
         cursor.execute("SELECT * FROM Brukere WHERE Navn = ?", (username,))
+        con.commit()
         result = cursor.fetchone()
+        print(result)
         if result is not None:
             print("Bruker finnes allerede!")
         cursor.execute("INSERT INTO Brukere (Navn, Passord, Ansatt) VALUES (?, ?, ?)", (username, password, 0,))
@@ -181,7 +199,7 @@ def checkInventory(user):
         cursor.execute("SELECT Ingredienser.Ingrediens, Ingredienser.HvorMye FROM Ingredienser")
         ingredients = cursor.fetchall()
         for ingredient in ingredients:
-            print(f"Ingredient: {ingredient[0]}, Quantity: {ingredient[1]}")
+            print(f"Ingrediens: {ingredient[0]}, Mengde: {ingredient[1]}")
     else:
         print("Bruker er ikke ansatt")
     con.close()
@@ -196,9 +214,23 @@ def checkOrders(username):
         cursor.execute('SELECT * FROM Ordre WHERE Hvem = ?', (username,))
     rows = cursor.fetchall()
     con.close()
+    cursor.execute("SELECT * FROM ordre ORDER BY ID ASC")
+    
+    # Determine the longest width for each column
+    header = ("Ordre Nr.", "Bestiller", "Burger", "Ferdig?")
+    widths = [len(cell) for cell in header]
     for row in rows:
-        print(f"{row}\n", sep='-')
+        for i, cell in enumerate(row):
+            widths[i] = max(len(str(cell)), widths[i])
 
+    # Construct formatted row like before
+    formatted_row = ' '.join('{:%d}' % width for width in widths)
+        
+    print(formatted_row.format(*header))
+    
+    for Row in rows:
+        print(formatted_row.format(*Row))
+        
 def completeOrder(ID):
     con = sqlite3.connect("database.db")
     cursor = con.cursor()
@@ -212,5 +244,4 @@ def completeOrder(ID):
     
     con.commit()
     con.close()
-    
-createUser("test", "123")
+
