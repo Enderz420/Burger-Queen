@@ -90,7 +90,6 @@ def listInventory(username): # TODO: Remove later
     else:
         print("Du har ikke tilgang til dette!")
 
-checkOrders()
 
 
 if __name__ == "__main__":

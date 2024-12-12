@@ -9,37 +9,42 @@ cursor = con.cursor()
 
 # ta inn burger, og bruker
 def addOrder(burger, bruker):
-    print("add order")
-    cursor.execute("INSERT INTO ordre (Hvem, Hva, Produsert) VALUES (?, ?, ?)", (bruker, burger, 0,))
-    con.commit()
-    cursor.execute("SELECT * FROM ordre")
-    print(cursor.fetchall())
-    cursor.execute("SELECT * FROM ordre ORDER BY ID DESC LIMIT 1;")
-    new_order = cursor.fetchone()
+    try:
+        con = sqlite3.connect("database.db")
+        cursor = con.cursor()
+        print("add order")
+        cursor.execute("INSERT INTO ordre (Hvem, Hva, Produsert) VALUES (?, ?, ?)", (bruker, burger, 0,))
+        con.commit()
+        cursor.execute("SELECT * FROM ordre")
+        print(cursor.fetchall())
+        cursor.execute("SELECT * FROM ordre ORDER BY ID DESC LIMIT 1;")
+        new_order = cursor.fetchone()
 
-    if new_order:
-        ordre_id, hvem, hva, produsert = new_order
-        if produsert == 1:
-            produsert = "Ja"
-        produsert = "Nei"
-        print(f"Nyeste bestilling: Bestillingsnummer: {ordre_id}\n Bestiller: {hvem}\n Burger: {hva}\n Ferdig? {produsert}")
-        deductIngredienser(burger)
-        
-        match produsert:
-            case "Ja":
-                produsert = 1
-            case "Nei":
-                produsert = 0
-            case _:
-                pass
-        if is_order_completed(produsert):
-            print("Bestilling er ferdig!")
+        if new_order:
+            ordre_id, hvem, hva, produsert = new_order
+            if produsert == 1:
+                produsert = "Ja"
+            produsert = "Nei"
+            print(f"Nyeste bestilling: Bestillingsnummer: {ordre_id}\n Bestiller: {hvem}\n Burger: {hva}\n Ferdig? {produsert}")
+            deductIngredienser(burger)
+            
+            match produsert:
+                case "Ja":
+                    produsert = 1
+                case "Nei":
+                    produsert = 0
+                case _:
+                    pass
+            if produsert == 1:
+                print("Bestilling er ferdig!")
+            else:
+                print("Nyeste bestilling er ikke ferdig enda.")
         else:
-            print("Nyeste bestilling er ikke ferdig enda.")
-    else:
-        print("Ingen bestilling funnet")
+            print("Ingen bestilling funnet")
+    except sqlite3.Error as e:
+        print(f"{e}")
 
-def removeOrder(ID): # TODO: Remove ingredients on order removal if it's done
+def removeOrder(ID):
     try:
         con = sqlite3.connect("database.db")
         print("remove order")
@@ -68,61 +73,59 @@ def removeOrder(ID): # TODO: Remove ingredients on order removal if it's done
             print("Could not handle")
             
         con.close()
-        
-        
     except sqlite3.Error as e:
         print(f"{e}")
 
-def is_order_completed(status):
-    ORDER_COMPLETED = 1
-    return status == ORDER_COMPLETED
-
 def deductIngredienser(burger):
-    con = sqlite3.connect("database.db")
-    cursor = con.cursor()
+    try:
+        con = sqlite3.connect("database.db")
+        cursor = con.cursor()
     
-    cursor.execute("SELECT IngrediensID FROM BurgerHasIngredienser WHERE BurgerID = ?", (burger,))
-    ingredienser = cursor.fetchall()
+        cursor.execute("SELECT IngrediensID FROM BurgerHasIngredienser WHERE BurgerID = ?", (burger,))
+        ingredienser = cursor.fetchall()
 
-    for g_ingrediens in ingredienser:
-        ingrediens = g_ingrediens[0]
+        for g_ingrediens in ingredienser:
+            ingrediens = g_ingrediens[0]
 
-        cursor.execute("SELECT HvorMye FROM Ingredienser WHERE ID = ?", (ingrediens,))
-        current_quantity = cursor.fetchone()[0]
-        amount_to_deduct = 1 
+            cursor.execute("SELECT HvorMye FROM Ingredienser WHERE ID = ?", (ingrediens,))
+            current_quantity = cursor.fetchone()[0]
+            amount_to_deduct = 1 
 
-        if int(current_quantity) >= amount_to_deduct:
-            cursor.execute("UPDATE Ingredienser SET HvorMye = HvorMye - ? WHERE ID = ?", (amount_to_deduct, ingrediens))
-            print(f"remove one {ingrediens}")
+            if int(current_quantity) >= amount_to_deduct:
+                cursor.execute("UPDATE Ingredienser SET HvorMye = HvorMye - ? WHERE ID = ?", (amount_to_deduct, ingrediens))
+                print(f"remove one {ingrediens}")
 
-        else:
-            print(f"Du har ikke nokk {ingrediens} til å lage dette!")
-        
-    con.commit()
-    
-    con.close()
+            else:
+                print(f"Du har ikke nokk {ingrediens} til å lage dette!")
+            
+        con.commit()
+        con.close()
+    except sqlite3.Error as e:
+        print(f"{e}")
     
 def addIngredienser(burger):
-    con = sqlite3.connect("database.db")
-    cursor = con.cursor()
-    
-    cursor.execute("SELECT IngrediensID FROM BurgerHasIngredienser WHERE BurgerID = ?", (burger))
-    ingredienser = cursor.fetchall()
+    try:
+        con = sqlite3.connect("database.db")
+        cursor = con.cursor()
+            
+        cursor.execute("SELECT IngrediensID FROM BurgerHasIngredienser WHERE BurgerID = ?", (burger))
+        ingredienser = cursor.fetchall()
 
-    for g_ingrediens in ingredienser:
-        ingrediens = g_ingrediens[0]
+        for g_ingrediens in ingredienser:
+            ingrediens = g_ingrediens[0]
 
-        cursor.execute("SELECT HvorMye FROM Ingredienser WHERE ID = ?", (ingrediens,))
-        current_quantity = cursor.fetchone()[0]
-        amount_to_add = 1 
+            cursor.execute("SELECT HvorMye FROM Ingredienser WHERE ID = ?", (ingrediens,))
+            current_quantity = cursor.fetchone()[0]
+            amount_to_add = 1 
 
-        if int(current_quantity) >= amount_to_add:
-            cursor.execute("UPDATE Ingredienser SET HvorMye = HvorMye + ? WHERE ID = ?", (amount_to_add, ingrediens))
-            print(f"add one {ingrediens}")
-                    
-    con.commit()
-    
-    con.close()
+            if int(current_quantity) >= amount_to_add:
+                cursor.execute("UPDATE Ingredienser SET HvorMye = HvorMye + ? WHERE ID = ?", (amount_to_add, ingrediens))
+                print(f"add one {ingrediens}")
+                        
+        con.commit()
+        con.close()
+    except sqlite3.Error as e:
+        print(f"{e}")
 
 def checkUser(user):
     con = sqlite3.connect("database.db")
@@ -143,11 +146,9 @@ def checkUserAnsettelse(user):
     else:
         return True
     
-    print(result)
-    
 def loginUser(user, password):
     con = sqlite3.connect("database.db")
-    print("loginUser")
+    print("Logging in.")
     cursor.execute("SELECT * FROM Brukere WHERE Navn = ? AND Passord = ?", (user, password,))
     result = cursor.fetchone()
     con.close()
@@ -155,6 +156,22 @@ def loginUser(user, password):
         return True
     else: 
         return False
+    
+def createUser(username, password):
+    try:    
+        con = sqlite3.connect("database.db")
+        cursor = con.cursor()
+        cursor.execute("SELECT * FROM Brukere WHERE Navn = ?", (username,))
+        result = cursor.fetchone()
+        if result is not None:
+            print("Bruker finnes allerede!")
+        cursor.execute("INSERT INTO Brukere (Navn, Passord, Ansatt) VALUES (?, ?, ?)", (username, password, 0,))
+        con.commit()
+        print(f"Bruker {username} opprettet!")
+        con.close()
+    except sqlite3.Error as e:
+        print(f"{e}")    
+    
 def checkInventory(user):
     con = sqlite3.connect("database.db")
     cursor.execute("SELECT * FROM Brukere WHERE Navn = ? AND Ansatt = 1", (user,))
@@ -182,4 +199,18 @@ def checkOrders(username):
     for row in rows:
         print(f"{row}\n", sep='-')
 
-checkOrders("Geralt")
+def completeOrder(ID):
+    con = sqlite3.connect("database.db")
+    cursor = con.cursor()
+    
+    cursor.execute("SELECT Produsert FROM Ordre WHERE ID = ?", (ID,))
+    result = cursor.fetchone()
+    
+    if result:
+        cursor.execute("UPDATE Ordre SET Produsert = 1 WHERE ID = ?", (ID,))
+        print(f"Ordre Nr:{ID} er ferdig.")
+    
+    con.commit()
+    con.close()
+    
+createUser("test", "123")
