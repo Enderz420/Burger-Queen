@@ -18,6 +18,9 @@ username = None # default value
 def main(): # TODO: Format output to be more prettier
     global username
     global isLoggedIn
+    global isAnsatt
+    
+    
     system("cls")
     term_size = get_terminal_size()
     print(Fore.BLUE + '=' * term_size.columns)
@@ -75,6 +78,7 @@ def main(): # TODO: Format output to be more prettier
                 case 5:
                     isLoggedIn = False
                     username = None
+                    isAnsatt = False
                     main()
                 case _:
                     pass
@@ -88,19 +92,21 @@ def main(): # TODO: Format output to be more prettier
                 case 2:
                     isLoggedIn = False
                     username = None
+                    isAnsatt = False
                     main()
                 case _:
                     pass
         
     
 def Ordre():
-    print("Ordre")
+    print("Side: Ordre")
+    print('#' * get_terminal_size())
     print(f"""
           Valg: 
             {Fore.BLUE}1: Sjekk bestillinger på en bruker 
             {Fore.GREEN}2: Marker en bestilling som ferdig for bruker 
             {Fore.RED}3: Fjerne bestilling !!! Gjør dette etter du har markert en bestilling som ferdig !!!{Fore.RESET} """)
-
+    print('#' * get_terminal_size())
     user_input = str(input("Vennligst oppgi valg: "))
     match user_input:
         case "1":
@@ -119,8 +125,12 @@ def Login():
     global isAnsatt
     global isLoggedIn
     global username
+    print('#' * get_terminal_size())
+    print('#' * get_terminal_size())
     print("Du må logge inn for å bruke appen")
     print(f"{Style.BRIGHT}OBS! Case sensitive!{Style.RESET_ALL}")
+    print('#' * get_terminal_size())
+    print('#' * get_terminal_size())
     username=str(input("Vennligst oppgi brukernavn: "))
     if checkUser(username):
         print(Fore.YELLOW + Style.BRIGHT + "Du har ikke bruker!")
@@ -135,6 +145,7 @@ def Login():
             Fore.RESET
             isAnsatt = True
         else:
+            isAnsatt = False
             print(Fore.GREEN + "Du har bruker men er ikke ansatt")
             Fore.RESET
             
