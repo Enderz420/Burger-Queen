@@ -19,6 +19,17 @@ term_size = get_terminal_size() # for buffers
 side = None # default
 c = datetime.now()
 current_time = c.strftime('%H:%M:%S')
+font = r"""
+            ______                                   _____                           
+            | ___ \                                 |  _  |                          
+            | |_/ / _   _  _ __   __ _   ___  _ __  | | | | _   _   ___   ___  _ __  
+            | ___ \| | | || '__| / _` | / _ \| '__| | | | || | | | / _ \ / _ \| '_ \ 
+            | |_/ /| |_| || |   | (_| ||  __/| |    \ \/' /| |_| ||  __/|  __/| | | |
+            \____/  \__,_||_|    \__, | \___||_|     \_/\_\ \__,_| \___| \___||_| |_|
+                                __/ |                                              
+                                |___/                                                                                                                         
+            """
+
 
 def main(): # TODO: Format output to be more prettier
     global username
@@ -30,26 +41,14 @@ def main(): # TODO: Format output to be more prettier
     system("cls")
     print(Fore.BLUE + '=' * term_size.columns)
     print(" ")
-    font = r"""
-            ______                                   _____                           
-            | ___ \                                 |  _  |                          
-            | |_/ / _   _  _ __   __ _   ___  _ __  | | | | _   _   ___   ___  _ __  
-            | ___ \| | | || '__| / _` | / _ \| '__| | | | || | | | / _ \ / _ \| '_ \ 
-            | |_/ /| |_| || |   | (_| ||  __/| |    \ \/' /| |_| ||  __/|  __/| | | |
-            \____/  \__,_||_|    \__, | \___||_|     \_/\_\ \__,_| \___| \___||_| |_|
-                                __/ |                                              
-                                |___/                                                                                                                         
-            """
     for s in font: # kul type on effect!
         sys.stdout.write(s)
         sys.stdout.flush()
-        time.sleep(0.001)
+        time.sleep(0.005)
     print("") # vil ødelegge dividers
     print('=' * term_size.columns)
     print(" ")
-    print(f"{Fore.LIGHTMAGENTA_EX}Klokken er {current_time}{Fore.RESET}")
-    print(f"{Fore.LIGHTMAGENTA_EX}Side: {side}{Fore.RESET}")
-    print(Fore.LIGHTYELLOW_EX + '-' * term_size.columns + Fore.RESET)
+    topBar()
     print(Style.BRIGHT + "Velkommen til Burger Queens nye bestillingsportal")
     print("Hva vil du gjøre?" + Style.RESET_ALL)
     while True:    
@@ -62,10 +61,10 @@ def main(): # TODO: Format output to be more prettier
             match user_input: # Start skjerm
                 case 1:
                     side = "Logg inn"
-                    Login()
+                    login()
                 case 2:
                     side = "Registrering"
-                    User()
+                    user()
                 case 3:
                     exit()
                 case _:
@@ -73,10 +72,7 @@ def main(): # TODO: Format output to be more prettier
         if isAnsatt: # Ansatt panel
             isLoggedIn = True
             side = "Ansatt Meny"
-            print(f"{Fore.LIGHTMAGENTA_EX}Side: {side}{Fore.RESET}")
-            print(f"{Fore.LIGHTMAGENTA_EX}Bruker: {username}{Fore.RESET}")
-            print(f"{Fore.LIGHTMAGENTA_EX}Klokken er {current_time}{Fore.RESET}")
-            print(Fore.LIGHTYELLOW_EX + '-' * term_size.columns + Fore.RESET)
+            topBar()
             print(Fore.LIGHTCYAN_EX + """
                 1: Sjekk aktive brukere 
                 2: Vis lager
@@ -91,8 +87,8 @@ def main(): # TODO: Format output to be more prettier
                 case 2:
                     checkInventory(username)
                 case 3:
-                    side = Ordre
-                    Ordre()
+                    side = "Ordre"
+                    ordre()
                 case 4:
                     init()
                 case 5:
@@ -105,10 +101,7 @@ def main(): # TODO: Format output to be more prettier
         else: # Bruker meny
             isLoggedIn = True
             side = "Meny"
-            print(f"{Fore.LIGHTMAGENTA_EX}Side: {side}{Fore.RESET}")
-            print(f"{Fore.LIGHTMAGENTA_EX}Bruker: {username}{Fore.RESET}")
-            print(f"{Fore.LIGHTMAGENTA_EX}Klokken er {current_time}{Fore.RESET}")
-            print(Fore.LIGHTYELLOW_EX + '-' * term_size.columns + Fore.RESET)
+            topBar()
             print(f"Meny: \n{Fore.GREEN}1: Bestill mat! \n{Fore.BLUE}2: Sjekk dine bestillinger! \n{Fore.RED}3: Logg ut {Fore.RESET}")
             print(" " * term_size.columns)
             user_input = int(input("Vennligst oppgi valg: ")) 
@@ -128,14 +121,9 @@ def main(): # TODO: Format output to be more prettier
                     pass
         
     
-def Ordre(): # Her kan du bestille og Håndtere aktive bestillinger.
+def ordre(): # Her kan du bestille og Håndtere aktive bestillinger.
     
-    system("cls")
-    print(f"{Fore.LIGHTMAGENTA_EX}Side: {side}{Fore.RESET}")
-    print(f"{Fore.LIGHTMAGENTA_EX}Bruker: {username}{Fore.RESET}")
-    print(f"{Fore.LIGHTMAGENTA_EX}Klokken er {current_time}{Fore.RESET}")
-    print(Fore.LIGHTYELLOW_EX + '-' * term_size.columns + Fore.RESET)
-    print("")
+    topBar()
     print(f"""
           Valg: 
             {Fore.BLUE}1: Sjekk bestillinger på en bruker 
@@ -157,16 +145,13 @@ def Ordre(): # Her kan du bestille og Håndtere aktive bestillinger.
             pass
     
     
-def Login(): # Logg in i programmet, sjekker om du er en bruker og er ansatt.
+def login(): # Logg in i programmet, sjekker om du er en bruker og er ansatt.
     global isAnsatt
     global isLoggedIn
     global username
     global side
     
-    system("cls")
-    print(f"{Fore.LIGHTMAGENTA_EX}Side: {side}{Fore.RESET}")
-    print(f"{Fore.LIGHTMAGENTA_EX}Klokken er {current_time}{Fore.RESET}")
-    print(Fore.LIGHTYELLOW_EX + '-' * term_size.columns + Fore.RESET)
+    topBar()
 
     print("Du må logge inn for å bruke appen")
     print(f"{Style.BRIGHT}OBS! Case sensitive!{Style.RESET_ALL}")
@@ -174,7 +159,7 @@ def Login(): # Logg in i programmet, sjekker om du er en bruker og er ansatt.
     if checkUser(username) is None or False:
         print(Fore.YELLOW + Style.BRIGHT + "Du har ikke bruker!" + Style.RESET_ALL + Fore.RESET)
         print(f"{Fore.RED}Du må lage en bruker for å bruke programmet{Fore.RESET}")
-        User()
+        user()
         
     if loginUser(username, password=str(input("Oppgi passord:\n"))): # klar tekst passord
         isLoggedIn = True
@@ -189,12 +174,10 @@ def Login(): # Logg in i programmet, sjekker om du er en bruker og er ansatt.
     else:
         print(Fore.RED + "Du har ikke en bruker!" + Fore.RESET)
     
-def User(): # Registerer ny bruker i prod
+def user(): # Registerer ny bruker i prod
     global username
     system("cls")
-    print(f"{Fore.LIGHTMAGENTA_EX}Side: {side}{Fore.RESET}")
-    print(f"{Fore.LIGHTMAGENTA_EX}Klokken er {current_time}{Fore.RESET}")
-    print(Fore.LIGHTYELLOW_EX + '-' * term_size.columns + Fore.RESET)
+    topBar()
     print("Registrer deg selv!")
     print(" ")
     username = str(input(Fore.LIGHTGREEN_EX + "Vennligst oppgi et unikt brukernavn:\n" + Fore.RESET))
@@ -202,6 +185,18 @@ def User(): # Registerer ny bruker i prod
     print("Du vil nå bli logget inn automatisk")
     time.sleep(0.5)
 
+def topBar():
+    system("cls")
+    print(" ")
+    print(Fore.BLUE + '=' * term_size.columns)
+    print(" ")
+    print(font)
+    print(" ") 
+    print('=' * term_size.columns)
+    print(" " + Fore.RESET)
+    print(f"{Fore.LIGHTMAGENTA_EX}Side: {side}{Fore.RESET}")
+    print(f"{Fore.LIGHTMAGENTA_EX}Klokken er {current_time}{Fore.RESET}")
+    print(Fore.LIGHTYELLOW_EX + '-' * term_size.columns + Fore.RESET)
+
 if __name__ == "__main__":
     main()
-    
