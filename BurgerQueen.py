@@ -4,26 +4,32 @@
 # En bruker som er ansatt skal kunne se alle ordre
 # En bruker som er ansatt skal kunne se inventaret av ingredienser
 # En bruker som er ansatt skal kunne markere en ordre som fullført, og systemet skal trekke fra brukte ingredienser fra inventaret
-from db import loginUser, checkInventory, checkUserAnsettelse, checkUser, checkOrders, addOrder, removeOrder, createUser, completeOrder, init
+from db import loginUser, checkInventory, checkUserAnsettelse, checkUser, checkOrders, addOrder, removeOrder, createUser, completeOrder, init, listBurgers
 from os import get_terminal_size, system
 from colorama import Fore, Style
 import time
 import sys
+from datetime import datetime
+
 
 isLoggedIn = False # default value
 isAnsatt = False # default value
 username = None # default value
-
+term_size = get_terminal_size() # for buffers
+side = None # default
+c = datetime.now()
+current_time = c.strftime('%H:%M:%S')
 
 def main(): # TODO: Format output to be more prettier
     global username
     global isLoggedIn
     global isAnsatt
-    
+    global side
+    side = "Start"
     
     system("cls")
-    term_size = get_terminal_size()
     print(Fore.BLUE + '=' * term_size.columns)
+    print(" ")
     font = r"""
             ______                                   _____                           
             | ___ \                                 |  _  |                          
@@ -34,44 +40,58 @@ def main(): # TODO: Format output to be more prettier
                                 __/ |                                              
                                 |___/                                                                                                                         
             """
-    for s in font:
+    for s in font: # kul type on effect!
         sys.stdout.write(s)
         sys.stdout.flush()
         time.sleep(0.001)
     print("") # vil ødelegge dividers
     print('=' * term_size.columns)
-    Style.RESET_ALL
-    print("Velkommen til Burger Queens nye bestillingsportal")
-    print("Hva vil du gjøre?")
+    print(" ")
+    print(f"{Fore.LIGHTMAGENTA_EX}Klokken er {current_time}{Fore.RESET}")
+    print(f"{Fore.LIGHTMAGENTA_EX}Side: {side}{Fore.RESET}")
+    print(Fore.LIGHTYELLOW_EX + '-' * term_size.columns + Fore.RESET)
+    print(Style.BRIGHT + "Velkommen til Burger Queens nye bestillingsportal")
+    print("Hva vil du gjøre?" + Style.RESET_ALL)
     while True:    
-        if not isLoggedIn:  
+        if not isLoggedIn: # Vil alltid starte her pga isLoggedIn
             print("Hovedmeny")
             print(Fore.GREEN + "1: Logg inn")
-            print(Fore.RED + "2: Avslutt programmet" + Fore.RESET)
+            print(Fore.GREEN + "2: Registrer")
+            print(Fore.RED + "3: Avslutt programmet" + Fore.RESET)
             user_input = int(input("Velg et av alternativene "))
-            match user_input:
+            match user_input: # Start skjerm
                 case 1:
+                    side = "Logg inn"
                     Login()
                 case 2:
-                    break
+                    side = "Registrering"
+                    User()
+                case 3:
+                    exit()
                 case _:
-                    break
-        if isAnsatt:
-            print("Meny:  ")
+                    pass
+        if isAnsatt: # Ansatt panel
+            isLoggedIn = True
+            side = "Ansatt Meny"
+            print(f"{Fore.LIGHTMAGENTA_EX}Side: {side}{Fore.RESET}")
+            print(f"{Fore.LIGHTMAGENTA_EX}Bruker: {username}{Fore.RESET}")
+            print(f"{Fore.LIGHTMAGENTA_EX}Klokken er {current_time}{Fore.RESET}")
+            print(Fore.LIGHTYELLOW_EX + '-' * term_size.columns + Fore.RESET)
             print(Fore.LIGHTCYAN_EX + """
                 1: Sjekk aktive brukere 
                 2: Vis lager
                 3: Ordre
                 4: Reset Database
                 5: Logg ut""" + Fore.RESET)
-
+            print("")
             user_input = int(input("Vennligst oppgi valg: "))
             match user_input:
                 case 1:
                     checkUser(username)
                 case 2:
-                    listInventory(username)
+                    checkInventory(username)
                 case 3:
+                    side = Ordre
                     Ordre()
                 case 4:
                     init()
@@ -82,14 +102,24 @@ def main(): # TODO: Format output to be more prettier
                     main()
                 case _:
                     pass
-        else:
-            print(f"Meny: \n{Fore.GREEN}1: Bestill mat! \n{Fore.RED}2: Logg ut{Fore.RESET}")
-            user_input = int(input("Vennligst oppgi valg: "))
+        else: # Bruker meny
+            isLoggedIn = True
+            side = "Meny"
+            print(f"{Fore.LIGHTMAGENTA_EX}Side: {side}{Fore.RESET}")
+            print(f"{Fore.LIGHTMAGENTA_EX}Bruker: {username}{Fore.RESET}")
+            print(f"{Fore.LIGHTMAGENTA_EX}Klokken er {current_time}{Fore.RESET}")
+            print(Fore.LIGHTYELLOW_EX + '-' * term_size.columns + Fore.RESET)
+            print(f"Meny: \n{Fore.GREEN}1: Bestill mat! \n{Fore.BLUE}2: Sjekk dine bestillinger! \n{Fore.RED}3: Logg ut {Fore.RESET}")
+            print(" " * term_size.columns)
+            user_input = int(input("Vennligst oppgi valg: ")) 
             match user_input:
                 case 1:
-                    burger=int(input("Hvilken burger vil du bestille?"))
+                    listBurgers()
+                    burger=int(input("Hvilken burger vil du bestille? "))
                     addOrder(burger, username)
                 case 2:
+                    checkOrders(username)         
+                case 3: # logg ut
                     isLoggedIn = False
                     username = None
                     isAnsatt = False
@@ -98,75 +128,79 @@ def main(): # TODO: Format output to be more prettier
                     pass
         
     
-def Ordre():
-    print("Side: Ordre")
-    print('#' * get_terminal_size())
+def Ordre(): # Her kan du bestille og Håndtere aktive bestillinger.
+    
+    system("cls")
+    print(f"{Fore.LIGHTMAGENTA_EX}Side: {side}{Fore.RESET}")
+    print(f"{Fore.LIGHTMAGENTA_EX}Bruker: {username}{Fore.RESET}")
+    print(f"{Fore.LIGHTMAGENTA_EX}Klokken er {current_time}{Fore.RESET}")
+    print(Fore.LIGHTYELLOW_EX + '-' * term_size.columns + Fore.RESET)
+    print("")
     print(f"""
           Valg: 
             {Fore.BLUE}1: Sjekk bestillinger på en bruker 
             {Fore.GREEN}2: Marker en bestilling som ferdig for bruker 
-            {Fore.RED}3: Fjerne bestilling !!! Gjør dette etter du har markert en bestilling som ferdig !!!{Fore.RESET} """)
-    print('#' * get_terminal_size())
+            {Fore.RED}3: Fjerne bestilling {Style.BRIGHT}!!! Gjør dette etter du har markert en bestilling som ferdig !!!{Style.RESET_ALL}{Fore.RESET} """)
+    print(Fore.LIGHTYELLOW_EX + '-' * term_size.columns + Fore.RESET)
+    print(" ")
     user_input = str(input("Vennligst oppgi valg: "))
     match user_input:
         case "1":
             checkOrders(username)
         case "2":
             checkOrders(username)
-            completeOrder(ID=int(input("Hvilken ordre er du ferdig med? ")))
+            completeOrder(ID=int(input(f"{Fore.GREEN}Hvilken ordre er du ferdig med?{Fore.RESET} ")))
         case "3":
             checkOrders(username)
-            removeOrder(ID=int(input("Hvilken ordre vil du fjerne ")))
+            removeOrder(ID=int(input(f"{Fore.RED}Hvilken ordre vil du fjerne{Fore.RESET} ")))
         case _:
             pass
     
     
-def Login():
+def Login(): # Logg in i programmet, sjekker om du er en bruker og er ansatt.
     global isAnsatt
     global isLoggedIn
     global username
-    print('#' * get_terminal_size())
-    print('#' * get_terminal_size())
+    global side
+    
+    system("cls")
+    print(f"{Fore.LIGHTMAGENTA_EX}Side: {side}{Fore.RESET}")
+    print(f"{Fore.LIGHTMAGENTA_EX}Klokken er {current_time}{Fore.RESET}")
+    print(Fore.LIGHTYELLOW_EX + '-' * term_size.columns + Fore.RESET)
+
     print("Du må logge inn for å bruke appen")
     print(f"{Style.BRIGHT}OBS! Case sensitive!{Style.RESET_ALL}")
-    print('#' * get_terminal_size())
-    print('#' * get_terminal_size())
-    username=str(input("Vennligst oppgi brukernavn: "))
-    if checkUser(username):
-        print(Fore.YELLOW + Style.BRIGHT + "Du har ikke bruker!")
-        print("Du må lage en bruker for å bruke programmet")
-        Style.RESET_ALL
-        Fore.RESET
+    username=str(input("Vennligst oppgi brukernavn:\n"))
+    if checkUser(username) is None or False:
+        print(Fore.YELLOW + Style.BRIGHT + "Du har ikke bruker!" + Style.RESET_ALL + Fore.RESET)
+        print(f"{Fore.RED}Du må lage en bruker for å bruke programmet{Fore.RESET}")
         User()
-    if loginUser(username, password=str(input("Oppgi passord: "))):
+        
+    if loginUser(username, password=str(input("Oppgi passord:\n"))): # klar tekst passord
         isLoggedIn = True
         if checkUserAnsettelse(username):
-            print(Fore.GREEN + "Du er ansatt!")
-            Fore.RESET
+            print(Fore.GREEN + "Du er ansatt!" + Fore.RESET)
             isAnsatt = True
+            system("cls")
         else:
             isAnsatt = False
-            print(Fore.GREEN + "Du har bruker men er ikke ansatt")
-            Fore.RESET
-            
+            print(Fore.GREEN + "Du har bruker men er ikke ansatt" + Fore.RESET)
+            system("cls")
     else:
-        print(Fore.RED + "Du har ikke en bruker!")
-        Fore.RESET
+        print(Fore.RED + "Du har ikke en bruker!" + Fore.RESET)
     
-def User():
+def User(): # Registerer ny bruker i prod
     global username
-    print("Registrer ny bruker")
-    username = str(input("Vennligst oppgi et unikt brukernavn "))
-    createUser(username, password=str(input("Vennligst oppgi et passord som du husker! ")))
-    
-def listInventory(username): # TODO: Remove later
-    if isLoggedIn & isAnsatt:    
-        print("oascnas")
-        checkInventory(username)
-    else:
-        print("Du har ikke tilgang til dette!")
-
-
+    system("cls")
+    print(f"{Fore.LIGHTMAGENTA_EX}Side: {side}{Fore.RESET}")
+    print(f"{Fore.LIGHTMAGENTA_EX}Klokken er {current_time}{Fore.RESET}")
+    print(Fore.LIGHTYELLOW_EX + '-' * term_size.columns + Fore.RESET)
+    print("Registrer deg selv!")
+    print(" ")
+    username = str(input(Fore.LIGHTGREEN_EX + "Vennligst oppgi et unikt brukernavn:\n" + Fore.RESET))
+    createUser(username, password=str(input(Fore.LIGHTWHITE_EX + "Vennligst oppgi et passord som du husker:\n" + Fore.RESET)))
+    print("Du vil nå bli logget inn automatisk")
+    time.sleep(0.5)
 
 if __name__ == "__main__":
     main()
