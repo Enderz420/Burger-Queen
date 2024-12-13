@@ -4,7 +4,7 @@ import sqlite3
 ## TODO: Clean up code.
 ### TODO: Comments
 
-def init():
+def init(): # Automatisk laster inn filler.sql for start data.
     with open('filler.sql', 'r') as sql_file:
         sql_script = sql_file.read()
 
@@ -49,8 +49,8 @@ def addOrder(burger, bruker):
         print(f"{e}")
 
 def removeOrder(ID):
-    try:
-        con = sqlite3.connect("database.db")
+    try: # try except for bedre error håndtering.
+        con = sqlite3.connect("database.db") # åpne databasen
         print("remove order")
         
         cursor = con.cursor()
@@ -59,20 +59,19 @@ def removeOrder(ID):
         
         cursor.execute("SELECT Produsert from ordre where ID = ?", (ID,))
         produsert = cursor.fetchone()
-        if produsert == 1:
+        if produsert == 1: # hvis burger er ferdig
             cursor.execute("SELECT Hva FROM Ordre where ID = ?", (ID,))
-            burgers = cursor.fetchone()
-            deductIngredienser(burgers)
+            burgers = cursor.fetchone() # hent burger
+            deductIngredienser(burgers) # fjern ingredienser fra burger
         else:
             cursor.execute("SELECT Hva FROM Ordre where ID = ?", (ID,))
-            burgers = cursor.fetchone()
-            addIngredienser(burgers)
+            burgers = cursor.fetchone() 
+            addIngredienser(burgers) # legge til ingredienser hvis den ikke er produsert, altså den er kansellert
         print(ID)
         print(result) 
-        if result == ID: 
+        if result == ID: # sjekke om result samsvarer med id på ordre
             cursor.execute("DELETE FROM Ordre WHERE ID = ?", (ID,))
             con.commit()
-            cursor.execute("SELECT * FROM Ordre")
         else:
             print("Could not handle")
         
@@ -98,12 +97,14 @@ def deductIngredienser(burger):
 
             if int(current_quantity) >= amount_to_deduct:
                 cursor.execute("UPDATE Ingredienser SET HvorMye = HvorMye - ? WHERE ID = ?", (amount_to_deduct, ingrediens))
-                print(f"remove one {ingrediens}")
+                cursor.execute("SELECT Ingrediens FROM Ingredienser WHERE ID = ?", (ingrediens,))
+                current_ingrediens = cursor.fetchone()
+                print(f"fjerner en {"".join(current_ingrediens)}")
 
             else:
                 cursor.execute("SELECT Ingrediens FROM Ingredienser WHERE ID = ?", (ingrediens,))
-                print(f"Du har ikke nokk {ingrediens} til å lage dette!")
-            
+                current_ingrediens = cursor.fetchone()
+                print(f"Du mangler {"".join(current_ingrediens)}")
         con.commit()
         con.close()
     except sqlite3.Error as e:
@@ -126,8 +127,9 @@ def addIngredienser(burger):
 
             if int(current_quantity) >= amount_to_add:
                 cursor.execute("UPDATE Ingredienser SET HvorMye = HvorMye + ? WHERE ID = ?", (amount_to_add, ingrediens))
-                print(f"add one {ingrediens}")
-                        
+                cursor.execute("SELECT Ingrediens FROM Ingredienser WHERE ID = ?", (ingrediens,))
+                current_ingrediens = cursor.fetchone()
+                print(f"legger til en {"".join(current_ingrediens)}")   
         con.commit()
         con.close()
     except sqlite3.Error as e:
@@ -140,7 +142,11 @@ def checkUser(user):
     cursor.execute("SELECT * FROM Brukere WHERE Navn = ?", (user,))
     result = cursor.fetchone()
     con.close()
-    print(result)
+    print(result)    
+    if result is None:
+        return False
+    else:
+        return result
 
 def listUsers():
     con = sqlite3.connect("database.db")
@@ -182,11 +188,12 @@ def createUser(username, password):
         result = cursor.fetchone()
         print(result)
         if result is not None:
-            print("Bruker finnes allerede!")
+            print("Brukeren finnes allerede!")
         cursor.execute("INSERT INTO Brukere (Navn, Passord, Ansatt) VALUES (?, ?, ?)", (username, password, 0,))
         con.commit()
         print(f"Bruker {username} opprettet!")
         con.close()
+        
     except sqlite3.Error as e:
         print(f"{e}")    
     
@@ -200,7 +207,7 @@ def checkInventory(user):
         cursor.execute("SELECT Ingredienser.Ingrediens, Ingredienser.HvorMye FROM Ingredienser")
         ingredients = cursor.fetchall()
         for ingredient in ingredients:
-            print(f"Ingrediens: {ingredient[0]}, Mengde: {ingredient[1]}")
+            print(f"Ingrediens: {ingredient[0]} Mengde: {ingredient[1]}")
     else:
         print("Bruker er ikke ansatt")
     con.close()
@@ -231,7 +238,7 @@ def checkOrders(username):
     
     for Row in rows:
         print(formatted_row.format(*Row))
-    con.close
+    con.close()
         
 def completeOrder(ID):
     con = sqlite3.connect("database.db")
@@ -247,3 +254,25 @@ def completeOrder(ID):
     con.commit()
     con.close()
 
+def listBurgers():
+    con = sqlite3.connect("database.db")
+    cursor = con.cursor()
+    
+    cursor.execute("SELECT * FROM Burger")
+    rows = cursor.fetchall()
+    
+        # Determine the longest width for each column
+    header = ("Burger Nr.", "Navn")
+    widths = [len(cell) for cell in header]
+    for row in rows:
+        for i, cell in enumerate(row):
+            widths[i] = max(len(str(cell)), widths[i])
+
+    # Construct formatted row like before
+    formatted_row = ' '.join('{:%d}' % width for width in widths)
+        
+    print(formatted_row.format(*header))
+    
+    for Row in rows:
+        print(formatted_row.format(*Row))
+    con.close()
