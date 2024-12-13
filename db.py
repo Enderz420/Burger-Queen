@@ -1,8 +1,5 @@
 import sqlite3
 
-con = sqlite3.connect("database.db")
-
-cursor = con.cursor()
 # TODO: Rework file to use classes instead of functions directly.
 ## TODO: Clean up code.
 ### TODO: Comments
@@ -138,6 +135,7 @@ def addIngredienser(burger):
 
 def checkUser(user):
     con = sqlite3.connect("database.db")
+    cursor = con.cursor()
     print("check user state")
     cursor.execute("SELECT * FROM Brukere WHERE Navn = ?", (user,))
     result = cursor.fetchone()
@@ -153,6 +151,7 @@ def listUsers():
     
 def checkUserAnsettelse(user):
     con = sqlite3.connect("database.db")
+    cursor = con.cursor()
     cursor.execute("SELECT navn FROM Brukere WHERE Navn = ? AND Ansatt = 1", (user,))
     result = cursor.fetchone()
     con.close()
@@ -164,6 +163,7 @@ def checkUserAnsettelse(user):
     
 def loginUser(user, password):
     con = sqlite3.connect("database.db")
+    cursor = con.cursor()
     print("Logging in.")
     cursor.execute("SELECT * FROM Brukere WHERE Navn = ? AND Passord = ?", (user, password,))
     result = cursor.fetchone()
@@ -192,6 +192,7 @@ def createUser(username, password):
     
 def checkInventory(user):
     con = sqlite3.connect("database.db")
+    cursor = con.cursor()
     cursor.execute("SELECT * FROM Brukere WHERE Navn = ? AND Ansatt = 1", (user,))
     result = cursor.fetchone()
     
@@ -206,6 +207,7 @@ def checkInventory(user):
         
 def checkOrders(username):
     con = sqlite3.connect("database.db")
+    cursor = con.cursor()
     cursor.execute("SELECT * FROM Brukere WHERE Navn = ? AND Ansatt = 1", (username,))
     result = cursor.fetchone()
     if result:
@@ -213,7 +215,6 @@ def checkOrders(username):
     else:    
         cursor.execute('SELECT * FROM Ordre WHERE Hvem = ?', (username,))
     rows = cursor.fetchall()
-    con.close()
     cursor.execute("SELECT * FROM ordre ORDER BY ID ASC")
     
     # Determine the longest width for each column
@@ -230,6 +231,7 @@ def checkOrders(username):
     
     for Row in rows:
         print(formatted_row.format(*Row))
+    con.close
         
 def completeOrder(ID):
     con = sqlite3.connect("database.db")
