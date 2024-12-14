@@ -48,7 +48,7 @@ def main(): # TODO: Format output to be more prettier
     print("") # vil ødelegge dividers
     print('=' * term_size.columns)
     print(" ")
-    topBar()
+    topBar(sys_cls=True, logo=True)
     print(Style.BRIGHT + "Velkommen til Burger Queens nye bestillingsportal")
     print("Hva vil du gjøre?" + Style.RESET_ALL)
     while True:    
@@ -72,7 +72,7 @@ def main(): # TODO: Format output to be more prettier
         if isAnsatt: # Ansatt panel
             isLoggedIn = True
             side = "Ansatt Meny"
-            topBar()
+            topBar(sys_cls=False, logo=False)
             print(Fore.LIGHTCYAN_EX + """
                 1: Sjekk aktive brukere 
                 2: Vis lager
@@ -84,8 +84,10 @@ def main(): # TODO: Format output to be more prettier
             match user_input:
                 case 1:
                     checkUser(username)
+                    time.sleep(0.5)
                 case 2:
                     checkInventory(username)
+                    time.sleep(0.5)
                 case 3:
                     side = "Ordre"
                     ordre()
@@ -101,7 +103,7 @@ def main(): # TODO: Format output to be more prettier
         else: # Bruker meny
             isLoggedIn = True
             side = "Meny"
-            topBar()
+            topBar(sys_cls=False, logo=False)
             print(f"Meny: \n{Fore.GREEN}1: Bestill mat! \n{Fore.BLUE}2: Sjekk dine bestillinger! \n{Fore.RED}3: Logg ut {Fore.RESET}")
             print(" " * term_size.columns)
             user_input = int(input("Vennligst oppgi valg: ")) 
@@ -123,24 +125,30 @@ def main(): # TODO: Format output to be more prettier
     
 def ordre(): # Her kan du bestille og Håndtere aktive bestillinger.
     
-    topBar()
+    topBar(sys_cls=False, logo=False)
     print(f"""
           Valg: 
             {Fore.BLUE}1: Sjekk bestillinger på en bruker 
             {Fore.GREEN}2: Marker en bestilling som ferdig for bruker 
-            {Fore.RED}3: Fjerne bestilling {Style.BRIGHT}!!! Gjør dette etter du har markert en bestilling som ferdig !!!{Style.RESET_ALL}{Fore.RESET} """)
+            {Fore.RED}3: Fjerne bestilling {Style.BRIGHT}!!! Gjør dette etter du har markert en bestilling som ferdig !!!{Style.RESET_ALL}{Fore.RESET} 
+            {Fore.CYAN}4: Tilbake til hovedmeny{Fore.RESET}""")
     print(Fore.LIGHTYELLOW_EX + '-' * term_size.columns + Fore.RESET)
     print(" ")
     user_input = str(input("Vennligst oppgi valg: "))
     match user_input:
         case "1":
             checkOrders(username)
+            ordre()
         case "2":
             checkOrders(username)
             completeOrder(ID=int(input(f"{Fore.GREEN}Hvilken ordre er du ferdig med?{Fore.RESET} ")))
+            ordre()
         case "3":
             checkOrders(username)
             removeOrder(ID=int(input(f"{Fore.RED}Hvilken ordre vil du fjerne{Fore.RESET} ")))
+            ordre()
+        case "4":
+            main()
         case _:
             pass
     
@@ -151,7 +159,7 @@ def login(): # Logg in i programmet, sjekker om du er en bruker og er ansatt.
     global username
     global side
     
-    topBar()
+    topBar(sys_cls=True, logo=True)
 
     print("Du må logge inn for å bruke appen")
     print(f"{Style.BRIGHT}OBS! Case sensitive!{Style.RESET_ALL}")
@@ -176,8 +184,7 @@ def login(): # Logg in i programmet, sjekker om du er en bruker og er ansatt.
     
 def user(): # Registerer ny bruker i prod
     global username
-    system("cls")
-    topBar()
+    topBar(sys_cls=True, logo=True)
     print("Registrer deg selv!")
     print(" ")
     username = str(input(Fore.LIGHTGREEN_EX + "Vennligst oppgi et unikt brukernavn:\n" + Fore.RESET))
@@ -185,15 +192,18 @@ def user(): # Registerer ny bruker i prod
     print("Du vil nå bli logget inn automatisk")
     time.sleep(0.5)
 
-def topBar():
-    system("cls")
-    print(" ")
-    print(Fore.BLUE + '=' * term_size.columns)
-    print(" ")
-    print(font)
-    print(" ") 
-    print('=' * term_size.columns)
-    print(" " + Fore.RESET)
+def topBar(sys_cls, logo):
+    if sys_cls is True:
+        system("cls")
+    if logo is True:    
+        print(" ")
+        print(Fore.BLUE + '=' * term_size.columns)
+        print(" ")
+        print(font)
+        print(" ") 
+        print('=' * term_size.columns)
+        print(" " + Fore.RESET)    
+    print(Fore.LIGHTYELLOW_EX + '-' * term_size.columns + Fore.RESET)
     print(f"{Fore.LIGHTMAGENTA_EX}Side: {side}{Fore.RESET}")
     print(f"{Fore.LIGHTMAGENTA_EX}Klokken er {current_time}{Fore.RESET}")
     print(Fore.LIGHTYELLOW_EX + '-' * term_size.columns + Fore.RESET)
