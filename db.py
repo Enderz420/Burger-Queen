@@ -1,9 +1,5 @@
 import sqlite3
 
-# TODO: Rework file to use classes instead of functions directly.
-## TODO: Clean up code.
-### TODO: Comments
-
 def init(): # Automatisk laster inn filler.sql for start data.
     with open('filler.sql', 'r') as sql_file:
         sql_script = sql_file.read()
@@ -34,8 +30,7 @@ def addOrder(burger, bruker):
                 produsert = "Ja"
             produsert = "Nei"
             print(f"Nyeste bestilling \nBestillingsnummer: {ordre_id}\n Bestiller: {hvem}\n Burger: {hva}\n Ferdig? {produsert}")
-            deductIngredienser(burger)
-            
+            deductIngredienser()
             match produsert:
                 case "Ja":
                     produsert = 1
@@ -48,7 +43,7 @@ def addOrder(burger, bruker):
     except sqlite3.Error as e:
         print(f"{e}")
 
-def removeOrder(ID):
+def removeOrder(ID): # tar inn ID og fjerner ordre
     try: # try except for bedre error håndtering.
         con = sqlite3.connect("database.db") # åpne databasen
         print("remove order")
@@ -59,16 +54,10 @@ def removeOrder(ID):
         
         cursor.execute("SELECT Produsert from ordre where ID = ?", (ID,))
         produsert = cursor.fetchone()
-        if produsert == 1: # hvis burger er ferdig
+        if produsert == 0: # hvis burger ikke er ferdig
             cursor.execute("SELECT Hva FROM Ordre where ID = ?", (ID,))
             burgers = cursor.fetchone() # hent burger
-            deductIngredienser(burgers) # fjern ingredienser fra burger
-        else:
-            cursor.execute("SELECT Hva FROM Ordre where ID = ?", (ID,))
-            burgers = cursor.fetchone() 
-            addIngredienser(burgers) # legge til ingredienser hvis den ikke er produsert, altså den er kansellert
-        print(ID)
-        print(result) 
+            addIngredienser(burgers) # legg til ingredienser 
         if result == ID: # sjekke om result samsvarer med id på ordre
             cursor.execute("DELETE FROM Ordre WHERE ID = ?", (ID,))
             con.commit()
@@ -80,7 +69,7 @@ def removeOrder(ID):
     except sqlite3.Error as e:
         print(f"{e}")
 
-def deductIngredienser(burger):
+def deductIngredienser(burger): # fjerner 1 ingrediens fra burgeren. Burgeren er ID nummeret på den.
     try:
         con = sqlite3.connect("database.db")
         cursor = con.cursor()
@@ -99,7 +88,7 @@ def deductIngredienser(burger):
                 cursor.execute("UPDATE Ingredienser SET HvorMye = HvorMye - ? WHERE ID = ?", (amount_to_deduct, ingrediens))
                 cursor.execute("SELECT Ingrediens FROM Ingredienser WHERE ID = ?", (ingrediens,))
                 current_ingrediens = cursor.fetchone()
-                print(f"fjerner en {"".join(current_ingrediens)}")
+                print(f"fjerner {"".join(current_ingrediens)}")
 
             else:
                 cursor.execute("SELECT Ingrediens FROM Ingredienser WHERE ID = ?", (ingrediens,))
@@ -110,7 +99,7 @@ def deductIngredienser(burger):
     except sqlite3.Error as e:
         print(f"{e}")
     
-def addIngredienser(burger):
+def addIngredienser(burger): # Legger til 1 av hver ingrediens som blir brukt av en burger, kan bare kalled hvis burger er ikke produsert
     try:
         con = sqlite3.connect("database.db")
         cursor = con.cursor()
@@ -135,27 +124,27 @@ def addIngredienser(burger):
     except sqlite3.Error as e:
         print(f"{e}")
 
-def checkUser(user):
+def checkUser(user): # Direkte kaller til databasen og gir tilbake data
     con = sqlite3.connect("database.db")
     cursor = con.cursor()
-    print("check user state")
     cursor.execute("SELECT * FROM Brukere WHERE Navn = ?", (user,))
     result = cursor.fetchone()
     con.close()
-    print(result)    
     if result is None:
         return False
     else:
         return result
 
-def listUsers():
+def listUsers(): # gir en liste over brukere med navn
     con = sqlite3.connect("database.db")
     cursor = con.cursor()
     cursor.execute("SELECT Navn FROM Brukere")
     result = cursor.fetchall()
-    print(result)
-    
-def checkUserAnsettelse(user):
+    print("Aktive brukere:")
+    for row in result:
+        print(f"- {row[0]}")
+
+def checkUserAnsettelse(user): # sjekker om brukeren er ansatt
     con = sqlite3.connect("database.db")
     cursor = con.cursor()
     cursor.execute("SELECT navn FROM Brukere WHERE Navn = ? AND Ansatt = 1", (user,))
@@ -167,7 +156,7 @@ def checkUserAnsettelse(user):
     else:
         return True
     
-def loginUser(user, password):
+def loginUser(user, password): # Logg inn bruker til applikasjonen med passord og brukernavn
     con = sqlite3.connect("database.db")
     cursor = con.cursor()
     print("Logging in.")
@@ -179,7 +168,7 @@ def loginUser(user, password):
     else: 
         return False
     
-def createUser(username, password):
+def createUser(username, password): # Lar bruker registrere seg til databasen med form av brukernavn og passord
     try:    
         con = sqlite3.connect("database.db")
         cursor = con.cursor()
@@ -197,7 +186,7 @@ def createUser(username, password):
     except sqlite3.Error as e:
         print(f"{e}")    
     
-def checkInventory(user):
+def checkInventory(user): # Sjekker inventar for hvor mye ingredienser du har
     con = sqlite3.connect("database.db")
     cursor = con.cursor()
     cursor.execute("SELECT * FROM Brukere WHERE Navn = ? AND Ansatt = 1", (user,))
@@ -212,7 +201,7 @@ def checkInventory(user):
         print("Bruker er ikke ansatt")
     con.close()
         
-def checkOrders(username):
+def checkOrders(username): # Sjekker alle aktive bestillinger med form av Nummer, Bestiller, Burger og om den er ferdig eller ikke
     con = sqlite3.connect("database.db")
     cursor = con.cursor()
     cursor.execute("SELECT * FROM Brukere WHERE Navn = ? AND Ansatt = 1", (username,))
@@ -240,7 +229,7 @@ def checkOrders(username):
         print(formatted_row.format(*Row))
     con.close()
         
-def completeOrder(ID):
+def completeOrder(ID): # Setter en ordre som ferdig
     con = sqlite3.connect("database.db")
     cursor = con.cursor()
     
@@ -254,7 +243,7 @@ def completeOrder(ID):
     con.commit()
     con.close()
 
-def listBurgers():
+def listBurgers(): # Gir tilbake alle burgere
     con = sqlite3.connect("database.db")
     cursor = con.cursor()
     

@@ -1,15 +1,9 @@
-# En bruker skal kunne logge inn i applikasjonen med riktig brukernavn og passord
-# En bruker skal kunne registrere en ordre med hvilken burger og antall
-# En bruker skal kunne se ordrene sine 
-# En bruker som er ansatt skal kunne se alle ordre
-# En bruker som er ansatt skal kunne se inventaret av ingredienser
-# En bruker som er ansatt skal kunne markere en ordre som fullført, og systemet skal trekke fra brukte ingredienser fra inventaret
-from db import loginUser, checkInventory, checkUserAnsettelse, checkUser, checkOrders, addOrder, removeOrder, createUser, completeOrder, init, listBurgers
-from os import get_terminal_size, system
-from colorama import Fore, Style
+from db import loginUser, checkInventory, checkUserAnsettelse, checkUser, checkOrders, addOrder, removeOrder, createUser, completeOrder, init, listBurgers, listUsers
+from os import get_terminal_size, system 
+from colorama import Fore, Style # colorama for farger
 import time
-import sys
-from datetime import datetime
+import sys 
+from datetime import datetime # hente tid
 
 
 isLoggedIn = False # default value
@@ -17,28 +11,26 @@ isAnsatt = False # default value
 username = None # default value
 term_size = get_terminal_size() # for buffers
 side = None # default
-c = datetime.now()
-current_time = c.strftime('%H:%M:%S')
-font = r"""
-            ______                                   _____                           
-            | ___ \                                 |  _  |                          
-            | |_/ / _   _  _ __   __ _   ___  _ __  | | | | _   _   ___   ___  _ __  
-            | ___ \| | | || '__| / _` | / _ \| '__| | | | || | | | / _ \ / _ \| '_ \ 
-            | |_/ /| |_| || |   | (_| ||  __/| |    \ \/' /| |_| ||  __/|  __/| | | |
-            \____/  \__,_||_|    \__, | \___||_|     \_/\_\ \__,_| \___| \___||_| |_|
-                                __/ |                                              
-                                |___/                                                                                                                         
-            """
 
-
-def main(): # TODO: Format output to be more prettier
+def main(): # main funksjon
     global username
     global isLoggedIn
     global isAnsatt
     global side
     side = "Start"
     
-    system("cls")
+    font = r"""
+                ______                                   _____                           
+                | ___ \                                 |  _  |                          
+                | |_/ / _   _  _ __   __ _   ___  _ __  | | | | _   _   ___   ___  _ __  
+                | ___ \| | | || '__| / _` | / _ \| '__| | | | || | | | / _ \ / _ \| '_ \ 
+                | |_/ /| |_| || |   | (_| ||  __/| |    \ \/' /| |_| ||  __/|  __/| | | |
+                \____/  \__,_||_|    \__, | \___||_|     \_/\_\ \__,_| \___| \___||_| |_|
+                                    __/ |                                              
+                                    |___/                                                                                                                         
+                """ # kreves for type on effect 
+
+    system("cls") # sletter alt i terminalen fra før sånn at du får en ren opplevelse
     print(Fore.BLUE + '=' * term_size.columns)
     print(" ")
     for s in font: # kul type on effect!
@@ -48,7 +40,7 @@ def main(): # TODO: Format output to be more prettier
     print("") # vil ødelegge dividers
     print('=' * term_size.columns)
     print(" ")
-    topBar(sys_cls=True, logo=True)
+    topBar(sys_cls=True, logo=True) # vil printe logo med 
     print(Style.BRIGHT + "Velkommen til Burger Queens nye bestillingsportal")
     print("Hva vil du gjøre?" + Style.RESET_ALL)
     while True:    
@@ -83,7 +75,7 @@ def main(): # TODO: Format output to be more prettier
             user_input = int(input("Vennligst oppgi valg: "))
             match user_input:
                 case 1:
-                    checkUser(username)
+                    listUsers()
                     time.sleep(0.5)
                 case 2:
                     checkInventory(username)
@@ -91,9 +83,9 @@ def main(): # TODO: Format output to be more prettier
                 case 3:
                     side = "Ordre"
                     ordre()
-                case 4:
-                    init()
-                case 5:
+                case 4: # reset
+                    init() # database reset
+                case 5: # logout
                     isLoggedIn = False
                     username = None
                     isAnsatt = False
@@ -192,7 +184,20 @@ def user(): # Registerer ny bruker i prod
     print("Du vil nå bli logget inn automatisk")
     time.sleep(0.5)
 
-def topBar(sys_cls, logo):
+def topBar(sys_cls, logo): # topBar for applikasjonen som viser tid logo, bruker, side og wiper terminalen. Logo og CLS er 2 variabler som er enten true eller false
+
+    c = datetime.now()
+    current_time = c.strftime('%H:%M:%S')
+    font = r"""
+                ______                                   _____                           
+                | ___ \                                 |  _  |                          
+                | |_/ / _   _  _ __   __ _   ___  _ __  | | | | _   _   ___   ___  _ __  
+                | ___ \| | | || '__| / _` | / _ \| '__| | | | || | | | / _ \ / _ \| '_ \ 
+                | |_/ /| |_| || |   | (_| ||  __/| |    \ \/' /| |_| ||  __/|  __/| | | |
+                \____/  \__,_||_|    \__, | \___||_|     \_/\_\ \__,_| \___| \___||_| |_|
+                                    __/ |                                              
+                                    |___/                                                                                                                         
+                """
     if sys_cls is True:
         system("cls")
     if logo is True:    
