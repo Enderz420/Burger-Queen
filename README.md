@@ -23,3 +23,10 @@ $ pip install -r requirements.txt
 $ python3 Burger-Queen.py
 ````
 
+For Docker
+
+````bash
+$ docker build -t burgerqueen .
+
+$ docker run -it burgerqueen
+````
