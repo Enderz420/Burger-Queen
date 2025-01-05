@@ -9,7 +9,7 @@ from datetime import datetime # hente tid
 isLoggedIn = False # default value
 isAnsatt = False # default value
 username = None # default value
-term_size = get_terminal_size() # for buffers
+term_size = get_terminal_size() # for buffers 
 side = None # default
 
 def main(): # main funksjon

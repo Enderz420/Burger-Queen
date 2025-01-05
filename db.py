@@ -88,12 +88,12 @@ def deductIngredienser(burger): # fjerner 1 ingrediens fra burgeren. Burgeren er
                 cursor.execute("UPDATE Ingredienser SET HvorMye = HvorMye - ? WHERE ID = ?", (amount_to_deduct, ingrediens))
                 cursor.execute("SELECT Ingrediens FROM Ingredienser WHERE ID = ?", (ingrediens,))
                 current_ingrediens = cursor.fetchone()
-                print(f"fjerner {"".join(current_ingrediens)}")
+                print(f"fjerner {''.join(current_ingrediens)}")
 
             else:
                 cursor.execute("SELECT Ingrediens FROM Ingredienser WHERE ID = ?", (ingrediens,))
                 current_ingrediens = cursor.fetchone()
-                print(f"Du mangler {"".join(current_ingrediens)}")
+                print(f"Du mangler {''.join(current_ingrediens)}")
         con.commit()
         con.close()
     except sqlite3.Error as e:
@@ -118,7 +118,7 @@ def addIngredienser(burger): # Legger til 1 av hver ingrediens som blir brukt av
                 cursor.execute("UPDATE Ingredienser SET HvorMye = HvorMye + ? WHERE ID = ?", (amount_to_add, ingrediens))
                 cursor.execute("SELECT Ingrediens FROM Ingredienser WHERE ID = ?", (ingrediens,))
                 current_ingrediens = cursor.fetchone()
-                print(f"legger til en {"".join(current_ingrediens)}")   
+                print(f"legger til en {''.join(current_ingrediens)}")   
         con.commit()
         con.close()
     except sqlite3.Error as e:
